@@ -10,13 +10,14 @@ import (
 
 // NewToken creates new JWT token for given user and app.
 func NewToken(user models.User, app models.App, duration time.Duration) (string, error) {
-	token := jwt.New(jwt.SigningMethodHS256)
-
-	claims := token.Claims.(jwt.MapClaims)
-	claims["uid"] = user.ID
-	claims["email"] = user.Email
-	claims["exp"] = time.Now().Add(duration).Unix()
-	claims["app_id"] = app.ID
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
+		jwt.MapClaims{
+			"uid":    user.ID,
+			"email":  user.Email,
+			"exp":    time.Now().Add(duration).Unix(),
+			"app_id": app.ID,
+		},
+	)
 
 	tokenString, err := token.SignedString([]byte(app.Secret))
 	if err != nil {
